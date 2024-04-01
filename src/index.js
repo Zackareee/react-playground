@@ -1,13 +1,13 @@
-import React, { StrictMode } from "react";
+import React from "react";
 import client from "react-dom/client";
 import ReactDOM from 'react-dom'
 import "./styles.css";
 
-import App from "./App";
+import { Board } from "./App";
 
 ReactDOM.render(
-    <StrictMode>
-        <App />
-    </StrictMode>, document.getElementById("root")
+    <React.StrictMode>
+        <Board />
+    </React.StrictMode>, document.getElementById("root")
 )
 
