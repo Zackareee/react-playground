@@ -3,11 +3,11 @@ import client from "react-dom/client";
 import ReactDOM from 'react-dom'
 import "./styles.css";
 
-import { Board } from "./App";
+import { Game } from "./App";
 
 ReactDOM.render(
     <React.StrictMode>
-        <Board />
+        <Game />
     </React.StrictMode>, document.getElementById("root")
 )
 
