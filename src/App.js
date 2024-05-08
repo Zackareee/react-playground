@@ -137,29 +137,81 @@ export function Game() {
 
 
 function calculateWinners(squares) {
+    const win_length = 5
     const board_size = Math.sqrt(squares.length)
-    for (let i = 0; i < board_size; i++){ //x coordinate, 1 - 10, left to right
-        for (let j = 0; j < board_size; j++){ //y coordinate, 1 - 10, top down
-            const current_coord = i * board_size + j; //current coordinate 1-100
+    for (let row = 0; row < board_size; row++){ //x coordinate, 1 - 10, left to right
+        for (let col = 0; col < board_size; col++){ //y coordinate, 1 - 10, top down
+            const current_coord = row * board_size + col; //current coordinate 1-100
+            let current_length = 1;
+            let previous_cell = null;
             if (squares[current_coord] === null) { continue; }
-            if (squares[current_coord] === squares[current_coord + board_size] && squares[current_coord] === squares[current_coord + (board_size*2)]) {// if current coordinate plus one below, plus two below
-                console.log("found one", squares[current_coord])
-                return squares[current_coord]
+            if (col < (board_size - win_length + 1)) {
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
+                    if (squares[current_coord+i] !== null && previous_cell === squares[current_coord+i]) {
+                        console.log(current_coord+i,squares[current_coord+i])
+                        current_length++
+                        console.log(current_length, squares[current_coord+i])
+                    }
+                    else {
+                        previous_cell = squares[current_coord+i];
+                        current_length = 1;
+                    }
+                    if (win_length <= current_length) {
+                        return squares[current_coord]
+                    }
+                }
             }
-            if (squares[current_coord] === squares[current_coord + 1] && squares[current_coord] === squares[current_coord + 2]) {// if current coordinate plus one right, plus two right
-                console.log("found one", squares[current_coord])
-                return squares[current_coord]
+            if (row < (board_size - win_length + 1)) {
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
+                    if (squares[current_coord + ( i * 10 )] !== null && previous_cell === squares[current_coord + ( i * 10 )]) {
+                        console.log(current_coord + ( i * 10 ),squares[current_coord + ( i * 10 )])
+                        current_length++
+                        console.log(current_length, squares[current_coord + ( i * 10 )])
+                    }
+                    else {
+                        previous_cell = squares[current_coord + ( i * 10 )];
+                        current_length = 1;
+                    }
+                    if (win_length <= current_length) {
+                        return squares[current_coord]
+                    }
+                }
             }
-            if (squares[current_coord] === squares[current_coord + board_size + 1] && squares[current_coord] === squares[current_coord + (board_size*2) + 2]) {// if current coordinate plus one down/right, plus two down/right
-                console.log("found one", squares[current_coord])
-                return squares[current_coord]
+
+            if (row < (board_size - win_length + 1) && col < (board_size - win_length + 1) ) { //TODO check this is correct bounds
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
+                    if (squares[current_coord + ( i * 10  )+ i] !== null && previous_cell === squares[current_coord + ( i * 10  )+ i]) {
+                        console.log(current_coord + ( i * 10 + i ),squares[current_coord + ( i * 10) + i ])
+                        current_length++
+                        console.log(current_length, squares[current_coord + ( i * 10 ) + i])
+                    }
+                    else {
+                        previous_cell = squares[current_coord + ( i * 10 ) + i];
+                        current_length = 1;
+                    }
+                    if (win_length <= current_length) {
+                        return squares[current_coord]
+                    }
+                }
             }
-            if (squares[current_coord] === squares[current_coord + board_size - 1] && squares[current_coord] === squares[current_coord + (board_size*2) - 2]) {// if current coordinate plus one down/left, plus two down/left
-                console.log("found one", squares[current_coord])
-                return squares[current_coord]
+
+            if (row < (board_size - win_length + 1) && col > (win_length - 2) ) { //TODO check this is correct bounds
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
+                    if (squares[current_coord + ( i * 10  )- i] !== null && previous_cell === squares[current_coord + ( i * 10  )- i]) {
+                        console.log(current_coord + ( i * 10 - i ),squares[current_coord + ( i * 10) - i ])
+                        current_length++
+                        console.log(current_length, squares[current_coord + ( i * 10 ) -i])
+                    }
+                    else {
+                        previous_cell = squares[current_coord + ( i * 10 ) - i];
+                        current_length = 1;
+                    }
+                    if (win_length <= current_length) {
+                        return squares[current_coord]
+                    }
+                }
             }
         }
     }
-
     return null
 }
