@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 function Square({ value, onSquareClick }) {
-    console.log('clicked!');
+    // console.log('clicked!');
     return <button onClick={onSquareClick} className="square">{value}</button>
 }
 
-function Board({ xIsNext, squares, onPlay }) {
+function Board({ xIsNext, squares, onPlay, playSize }) {
     function handleClick(i) {
         if (squares[i] || calculateWinners(squares)) {
             return;
@@ -26,26 +26,60 @@ function Board({ xIsNext, squares, onPlay }) {
     } else {
         status = "Next player: " + (xIsNext ? "X" : "O")
     }
-    console.log(status)
+    // console.log(status)
 
+    const board_size = playSize;
+    const row_size = board_size;
+    const col_size = board_size; //set up for debugging with various board sizes
     return <>
-    <div className="status">{status}</div>
-    <div className="board-row">
-        <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
-        <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
-        <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
-    </div>
-    <div className="board-row">
-        <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
-        <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
-        <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
-    </div>
-    <div className="board-row">
-        <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
-        <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
-        <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
-    </div>
+          <div className="status">{status}</div>
+          {Array.from(Array(row_size).keys()).map(row => (
+            <div className="board-row">
+            {Array.from(Array(col_size).keys()).map(col => (
+                <Square key={row * board_size + col} value={squares[row * board_size + col]} onSquareClick={() => handleClick(row * board_size + col)} />
+            ))}
+            </div>
+          ))}
     </>;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* 
+
+
+          {[0, 1, 2, 3].map(row => (
+            <div key={row} className="board-row">
+              {[0, 1, 2, 3].map(col => {
+                const index = row * 4 + col;
+                return (
+                  <Square
+                    key={index}
+                    value={squares[index]}
+                    onSquareClick={() => handleClick(index)}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </>; */}
 }
 
 
@@ -53,8 +87,9 @@ function Board({ xIsNext, squares, onPlay }) {
 
 
 export function Game() {
+    const [boardSize, setBoardSize] = useState(10);
     const [xIsNext, setXIsNext] = useState(true);
-    const [history, setHistory] = useState([Array(9).fill(null)]);
+    const [history, setHistory] = useState([Array(boardSize**2).fill(null)]);
     const [currentMove, setCurrentMove] = useState(0);
     const currentSquares = history[currentMove];
 
@@ -63,7 +98,7 @@ export function Game() {
         setHistory(nextHistory);
         setCurrentMove(nextHistory.length - 1);
         setXIsNext(!xIsNext)
-        console.log(history)
+        // console.log(history)
     }
 
     function jumpTo(nextMove) {
@@ -90,7 +125,7 @@ export function Game() {
     return (
         <div className='game'>
             <div className='game-board'>
-                <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>    
+                <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} playSize={boardSize}/>    
             </div>
             <div className='game-info'>
                 <ol>{moves}</ol>
@@ -102,21 +137,29 @@ export function Game() {
 
 
 function calculateWinners(squares) {
-    const lines = [
-        [0,1,2],
-        [3,4,5],
-        [6,7,8],
-        [0,3,6],
-        [1,4,7],
-        [2,5,8],
-        [0,4,8],
-        [2,4,6]
-    ];  
-    for (let i = 0; i < lines.length; i++) {
-        const [a,b,c] = lines[i];
-        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+    const board_size = Math.sqrt(squares.length)
+    for (let i = 0; i < board_size; i++){ //x coordinate, 1 - 10, left to right
+        for (let j = 0; j < board_size; j++){ //y coordinate, 1 - 10, top down
+            const current_coord = i * board_size + j; //current coordinate 1-100
+            if (squares[current_coord] === null) { continue; }
+            if (squares[current_coord] === squares[current_coord + board_size] && squares[current_coord] === squares[current_coord + (board_size*2)]) {// if current coordinate plus one below, plus two below
+                console.log("found one", squares[current_coord])
+                return squares[current_coord]
+            }
+            if (squares[current_coord] === squares[current_coord + 1] && squares[current_coord] === squares[current_coord + 2]) {// if current coordinate plus one right, plus two right
+                console.log("found one", squares[current_coord])
+                return squares[current_coord]
+            }
+            if (squares[current_coord] === squares[current_coord + board_size + 1] && squares[current_coord] === squares[current_coord + (board_size*2) + 2]) {// if current coordinate plus one down/right, plus two down/right
+                console.log("found one", squares[current_coord])
+                return squares[current_coord]
+            }
+            if (squares[current_coord] === squares[current_coord + board_size - 1] && squares[current_coord] === squares[current_coord + (board_size*2) - 2]) {// if current coordinate plus one down/left, plus two down/left
+                console.log("found one", squares[current_coord])
+                return squares[current_coord]
+            }
         }
     }
+
     return null
 }
