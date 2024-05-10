@@ -1,8 +1,22 @@
 import { useState } from 'react';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 function Square({ value, onSquareClick }) {
-    // console.log('clicked!');
-    return <button onClick={onSquareClick} className="square">{value}</button>
+    const boxSize = 44 //px
+
+    if (value == "X") {
+        return  <Button  style={{ fontSize: 30, m: 1, height: boxSize , border: '1px solid #999', minWidth: boxSize, width:boxSize  }} variant="outlined" color="success" >{value}</Button> 
+    } else if (value == "0") {
+        return <Button onClick={onSquareClick} variant="outlined" color="error" style={{ fontSize: 30, m: 1, height: boxSize , border: '1px solid #999', minWidth: boxSize, width:boxSize,  }}>{value}</Button>
+    }
+    else {
+        return <Button onClick={onSquareClick} variant="outlined" style={{ fontSize: 30, m: 1, height: boxSize , border: '1px solid #999', minWidth: boxSize, width:boxSize,  }}>{value}</Button>
+    }
+    // return <button onClick={onSquareClick} className="square" >{value}</button>
 }
 
 function Board({ xIsNext, squares, onPlay, playSize, winSize}) {
@@ -22,7 +36,7 @@ function Board({ xIsNext, squares, onPlay, playSize, winSize}) {
     const winner = calculateWinners(squares, winSize);
     let status;
     if (winner) {
-        status = "winner: " + winner
+        status = "Winner: " + winner
     } else {
         status = "Next player: " + (xIsNext ? "X" : "O")
     }
@@ -32,7 +46,7 @@ function Board({ xIsNext, squares, onPlay, playSize, winSize}) {
     const row_size = board_size;
     const col_size = board_size; //set up for debugging with various board sizes
     return <>
-          <div className="status">{status}</div>
+          <div className="status"><strong>{status}</strong></div>
           {Array.from(Array(row_size).keys()).map(row => (
             <div className="board-row">
             {Array.from(Array(col_size).keys()).map(col => (
@@ -41,45 +55,6 @@ function Board({ xIsNext, squares, onPlay, playSize, winSize}) {
             </div>
           ))}
     </>;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{/* 
-
-
-          {[0, 1, 2, 3].map(row => (
-            <div key={row} className="board-row">
-              {[0, 1, 2, 3].map(col => {
-                const index = row * 4 + col;
-                return (
-                  <Square
-                    key={index}
-                    value={squares[index]}
-                    onSquareClick={() => handleClick(index)}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </>; */}
 }
 
 
@@ -146,23 +121,28 @@ export function Game() {
 
     return (
         <>
-            <form onSubmit={setWidth}>
-                Board Width: <input defaultValue="3"  name="width" />
-                <button type="submit">Search</button>
-            </form>
-            <form onSubmit={setWinLength}>
-                Win Length: <input defaultValue="3" name="winlength" />
-                <button type="submit">Search</button>
-            </form>
-
-            <div className='game'>
-                <div className='game-board'>
-                    <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} playSize={boardSize} winSize={winLength} />    
+            <Box onSubmit={setWidth} component="form" sx={{ '& .MuiTextField-root': { m: 1, width: '25ch'}, }} noValidate autoComplete="off" >
+                <div style={ {display:'flex', alignItems:'center'} }>
+                    <TextField  name="width"  id="outlined-search" label="Search field" type="search" />
+                    <Button type="submit" variant="contained">Go</Button>
                 </div>
-                <div className='game-info'>
-                    <ol>{moves}</ol>
+            </Box>
+            <Box onSubmit={setWinLength} component="form" sx={{ '& .MuiTextField-root': { m: 1, width: '25ch'}, }} noValidate autoComplete="off" >
+                <div style={ {display:'flex', alignItems:'center'} }>
+                    <TextField  name="winlength"  id="outlined-search" label="Search field" type="search" />
+                    <Button type="submit" variant="contained">Go</Button>
                 </div>
+            </Box>
+            <div style={ {margin:'10px'} }>
+                <div className='game'>
+                    <div className='game-board'>
+                        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} playSize={boardSize} winSize={winLength} />    
+                    </div>
+                    <div className='game-info'>
+                        <ol>{moves}</ol>
+                    </div>
 
+                </div>
             </div>
         </>
     ) 
