@@ -5,9 +5,9 @@ function Square({ value, onSquareClick }) {
     return <button onClick={onSquareClick} className="square">{value}</button>
 }
 
-function Board({ xIsNext, squares, onPlay, playSize }) {
+function Board({ xIsNext, squares, onPlay, playSize, winSize}) {
     function handleClick(i) {
-        if (squares[i] || calculateWinners(squares)) {
+        if (squares[i] || calculateWinners(squares, winSize)) {
             return;
         }
 
@@ -19,7 +19,7 @@ function Board({ xIsNext, squares, onPlay, playSize }) {
     }
     
 
-    const winner = calculateWinners(squares);
+    const winner = calculateWinners(squares, winSize);
     let status;
     if (winner) {
         status = "winner: " + winner
@@ -84,10 +84,12 @@ function Board({ xIsNext, squares, onPlay, playSize }) {
 
 
 
+  
 
 
 export function Game() {
-    const [boardSize, setBoardSize] = useState(10);
+    const [boardSize, setBoardSize] = useState(3);
+    const [winLength, setwinLength] = useState(3);
     const [xIsNext, setXIsNext] = useState(true);
     const [history, setHistory] = useState([Array(boardSize**2).fill(null)]);
     const [currentMove, setCurrentMove] = useState(0);
@@ -119,38 +121,71 @@ export function Game() {
             </li>
         )
 
-    }) 
+    })  
 
+    const setWidth = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target)
+        const inputValue = formData.get('width')
+        console.log(inputValue)
+        setBoardSize(parseInt(inputValue))
+        setHistory([Array(boardSize**2).fill(null)])
+        setCurrentMove(0)
+        setXIsNext(true)
+    }
+    const setWinLength = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target)
+        const inputValue = formData.get('winlength')
+        console.log(inputValue)
+        setwinLength(parseInt(inputValue))
+        setHistory([Array(boardSize**2).fill(null)])
+        setCurrentMove(0)
+        setXIsNext(true)
+    }
 
     return (
-        <div className='game'>
-            <div className='game-board'>
-                <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} playSize={boardSize}/>    
-            </div>
-            <div className='game-info'>
-                <ol>{moves}</ol>
-            </div>
+        <>
+            <form onSubmit={setWidth}>
+                Board Width: <input defaultValue="3"  name="width" />
+                <button type="submit">Search</button>
+            </form>
+            <form onSubmit={setWinLength}>
+                Win Length: <input defaultValue="3" name="winlength" />
+                <button type="submit">Search</button>
+            </form>
 
-        </div>
+            <div className='game'>
+                <div className='game-board'>
+                    <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} playSize={boardSize} winSize={winLength} />    
+                </div>
+                <div className='game-info'>
+                    <ol>{moves}</ol>
+                </div>
+
+            </div>
+        </>
     ) 
 }
 
 
-function calculateWinners(squares) {
-    const win_length = 5
+
+function calculateWinners(squares, winSize) {
+    let run_length = 0;
+    const win_length = winSize
     const board_size = Math.sqrt(squares.length)
     for (let row = 0; row < board_size; row++){ //x coordinate, 1 - 10, left to right
         for (let col = 0; col < board_size; col++){ //y coordinate, 1 - 10, top down
+            run_length++
             const current_coord = row * board_size + col; //current coordinate 1-100
             let current_length = 1;
             let previous_cell = null;
             if (squares[current_coord] === null) { continue; }
             if (col < (board_size - win_length + 1)) {
-                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
-                    if (squares[current_coord+i] !== null && previous_cell === squares[current_coord+i]) {
-                        console.log(current_coord+i,squares[current_coord+i])
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one right, plus one more right ... win_length
+                    run_length++
+                    if (squares[current_coord+i] !== null && squares[current_coord + i] !== undefined && previous_cell === squares[current_coord+i]) {
                         current_length++
-                        console.log(current_length, squares[current_coord+i])
                     }
                     else {
                         previous_cell = squares[current_coord+i];
@@ -161,15 +196,16 @@ function calculateWinners(squares) {
                     }
                 }
             }
+            current_length = 1;
+            previous_cell = null;
             if (row < (board_size - win_length + 1)) {
-                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
-                    if (squares[current_coord + ( i * 10 )] !== null && previous_cell === squares[current_coord + ( i * 10 )]) {
-                        console.log(current_coord + ( i * 10 ),squares[current_coord + ( i * 10 )])
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one down, plus one more down ... win_length
+                    run_length++
+                    if (squares[current_coord + ( i * board_size )] !== null && squares[current_coord + ( i * board_size )] !== undefined && previous_cell === squares[current_coord + ( i * board_size )]) {
                         current_length++
-                        console.log(current_length, squares[current_coord + ( i * 10 )])
                     }
                     else {
-                        previous_cell = squares[current_coord + ( i * 10 )];
+                        previous_cell = squares[current_coord + ( i * board_size )];
                         current_length = 1;
                     }
                     if (win_length <= current_length) {
@@ -177,16 +213,16 @@ function calculateWinners(squares) {
                     }
                 }
             }
-
+            current_length = 1;
+            previous_cell = null;
             if (row < (board_size - win_length + 1) && col < (board_size - win_length + 1) ) { //TODO check this is correct bounds
-                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
-                    if (squares[current_coord + ( i * 10  )+ i] !== null && previous_cell === squares[current_coord + ( i * 10  )+ i]) {
-                        console.log(current_coord + ( i * 10 + i ),squares[current_coord + ( i * 10) + i ])
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one down/right, plus one more down/right ... win_length
+                    run_length++
+                    if (squares[current_coord + ( i * board_size  )+ i] !== null && squares[current_coord  + ( i * board_size  )+ i] !== undefined && previous_cell === squares[current_coord + ( i * board_size  )+ i]) {
                         current_length++
-                        console.log(current_length, squares[current_coord + ( i * 10 ) + i])
                     }
                     else {
-                        previous_cell = squares[current_coord + ( i * 10 ) + i];
+                        previous_cell = squares[current_coord + ( i * board_size ) + i];
                         current_length = 1;
                     }
                     if (win_length <= current_length) {
@@ -194,16 +230,16 @@ function calculateWinners(squares) {
                     }
                 }
             }
-
+            current_length = 1;
+            previous_cell = null;
             if (row < (board_size - win_length + 1) && col > (win_length - 2) ) { //TODO check this is correct bounds
-                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one to the right, plus one more to the right ... win_length
-                    if (squares[current_coord + ( i * 10  )- i] !== null && previous_cell === squares[current_coord + ( i * 10  )- i]) {
-                        console.log(current_coord + ( i * 10 - i ),squares[current_coord + ( i * 10) - i ])
+                for (let i = 0; i <= win_length; i++) { // if current coordinate equals one down/left, plus one more down/left ... win_length
+                    run_length++
+                    if (squares[current_coord + ( i * board_size  )- i] !== null && squares[current_coord  + ( i * board_size  ) - i] !== undefined && previous_cell === squares[current_coord + ( i * board_size  )- i]) {
                         current_length++
-                        console.log(current_length, squares[current_coord + ( i * 10 ) -i])
                     }
                     else {
-                        previous_cell = squares[current_coord + ( i * 10 ) - i];
+                        previous_cell = squares[current_coord + ( i * board_size ) - i];
                         current_length = 1;
                     }
                     if (win_length <= current_length) {
@@ -213,5 +249,6 @@ function calculateWinners(squares) {
             }
         }
     }
+    // console.log(run_length)
     return null
 }
